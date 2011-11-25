@@ -23,8 +23,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package tinyq;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -40,64 +38,6 @@ public class Query<T> implements Iterable<T>{
 
     public interface Accum<TIN1,TOUT>{
         public TOUT run(TIN1 in, TOUT in2);
-    }
-
-    private static class BufferedReaderIterator<T extends String> implements Iterator<String>{
-        private BufferedReader _reader;
-
-        public BufferedReaderIterator(BufferedReader reader){
-            _reader = reader;
-        }
-
-        String _str = null;
-        boolean _hasCached = false;
-
-
-        public boolean hasNext() {
-            if(_hasCached){
-                return true;
-            }
-            try {
-                _str = _reader.readLine();
-                if(_str != null){
-                    _hasCached = true;
-                }
-            } catch (IOException e) {
-                StringBuilder sb = new StringBuilder();
-                String var = e.getMessage();
-                if(var != null) {
-                    sb.append(var); sb.append("\n");
-                }
-
-                StackTraceElement[] stackTrace = e.getStackTrace();
-                if(stackTrace != null){
-                    Query<String> query = (new Query<StackTraceElement>(stackTrace)).select(new Func<StackTraceElement, String>() {
-                        public String run(StackTraceElement in) {
-                            return in.toString();
-                        }
-                    });
-                    sb.append(query.aggregate(new StringBuilder(), new Accum<Query<String>, StringBuilder>() {
-                        public StringBuilder run(Query<String> in, StringBuilder in2) {
-                            in2.append(in);
-                            return in2;
-                        }
-                    }).toString());
-                }
-                throw new IndexOutOfBoundsException(sb.toString());
-            }
-            return false;
-        }
-
-        public String next() {
-            if(hasNext()){
-                return _str;
-            }
-            throw new IndexOutOfBoundsException();
-        }
-
-        public void remove() {
-            throw new IndexOutOfBoundsException("Operation not supported");
-        }
     }
 
     private static class ArrayIterator<T> implements Iterator<T>{
@@ -338,10 +278,6 @@ public class Query<T> implements Iterable<T>{
 
     public Query(Iterator<T> iterator) {
         _iterator = iterator;
-    }
-
-    public Query(BufferedReader reader){
-        _iterator = new BufferedReaderIterator(reader);
     }
 
 }
