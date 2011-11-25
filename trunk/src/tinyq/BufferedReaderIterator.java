@@ -39,8 +39,8 @@ public class BufferedReaderIterator<T extends String> implements Iterator<String
                         return in.toString();
                     }
                 });
-                sb.append(query.aggregate(new StringBuilder(), new Query.Accum<Query<String>, StringBuilder>() {
-                    public StringBuilder run(Query<String> in, StringBuilder in2) {
+                sb.append(query.aggregate(new StringBuilder(), new Query.Accum<String, StringBuilder>() {
+                    public StringBuilder run(String in, StringBuilder in2) {
                         in2.append(in);
                         return in2;
                     }
