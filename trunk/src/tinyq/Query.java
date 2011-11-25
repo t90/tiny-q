@@ -267,11 +267,6 @@ public class Query<T> implements Iterable<T>{
         return accumulator;
     }
 
-
-    public Query(List<T> list){
-        _iterator = list.iterator();
-    }
-
     public Query(T[] array) {
         _iterator = new ArrayIterator<T>(array);
     }
