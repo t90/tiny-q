@@ -263,11 +263,11 @@ public class Query<T> implements Iterable<T>{
      * @param fold - folding function
      * @return - a new value based on items from the sequence
      */
-    public <TAGGR> TAGGR aggregate(TAGGR accumulator, Accum<Query<T>,TAGGR> fold){
+    public <TAGGR> TAGGR aggregate(TAGGR accumulator, Accum<T,TAGGR> fold){
         if(accumulator == null)
             throw new NullPointerException();
         for(T t : this){
-            accumulator = fold.run(this,accumulator);
+            accumulator = fold.run(t,accumulator);
         }
         return accumulator;
     }
