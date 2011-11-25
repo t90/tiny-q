@@ -225,6 +225,10 @@ public class Query<T> implements Iterable<T>{
         return new Query<TOUT>(new SelectManyIterator<T,TOUT>(_iterator,selector));
     }
 
+    public Query(List<T> list){
+        _iterator = list.iterator();
+    }
+
     public Query(T[] array) {
         _iterator = new ArrayIterator<T>(array);
     }
