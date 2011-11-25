@@ -230,8 +230,7 @@ public class Query<T> implements Iterable<T>{
     }
 
     /**
-     * Assign a new filter to the Query, returned query will yield only the items for which
-     * selector returned true
+     * Filter sequence yielding only the items where selector.run returns true
      * @param selector - checks if an item should stay in output query, selector.run(..) should return true
      * if we want to keep the item, or false if not.
      * @return a new Query with items filtered with selector
@@ -241,7 +240,7 @@ public class Query<T> implements Iterable<T>{
     }
 
     /**
-     * Convert collection to another, processing each item.
+     * Map one sequence to another, processing each item.
      * @param selector - gets every item and returns an item for a new Query
      * @return a new query with items processed by selector
      */
@@ -250,19 +249,25 @@ public class Query<T> implements Iterable<T>{
     }
 
     /**
-     * Convert collection each item yielding another collection to a flat collection
-     * @param selector function returning a new collection for an item in incoming collection
+     * Convert sequence of sequences into a flat sequence.
+     * @param selector function returning a new sequence for an item in input sequence
      * @return a new query flat with all items from evey collection returned by selector.
      */
     public <TOUT> Query<TOUT> selectMany(Func<T, Query<TOUT>> selector){
         return new Query<TOUT>(new SelectManyIterator<T,TOUT>(_iterator,selector));
     }
 
-    public <TAGGR> TAGGR aggregate(TAGGR accumulator, Accum<Query<T>,TAGGR> aggregator){
+    /**
+     * Fold the sequence.
+     * @param accumulator - accumulator to fold function into
+     * @param fold - folding function
+     * @return - a new value based on items from the sequence
+     */
+    public <TAGGR> TAGGR aggregate(TAGGR accumulator, Accum<Query<T>,TAGGR> fold){
         if(accumulator == null)
             throw new NullPointerException();
         for(T t : this){
-            accumulator = aggregator.run(this,accumulator);
+            accumulator = fold.run(this,accumulator);
         }
         return accumulator;
     }
