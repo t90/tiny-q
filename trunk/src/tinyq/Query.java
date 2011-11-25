@@ -280,4 +280,8 @@ public class Query<T> implements Iterable<T>{
         _iterator = iterator;
     }
 
+    public Query(Iterable<T> collection){
+        _iterator = collection.iterator();
+    }
+
 }
