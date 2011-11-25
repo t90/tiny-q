@@ -23,6 +23,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package tinyq;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -168,6 +169,10 @@ public class Query<T> implements Iterable<T>{
         }
     }
 
+    /**
+     * Process the query and get the amount of the items in it.
+     * @return number of items in collection.
+     */
     public int size() {
         int size = 0;
         while(_iterator.hasNext()){
@@ -177,6 +182,10 @@ public class Query<T> implements Iterable<T>{
         return size;
     }
 
+    /**
+     * Check if any items can be yeilded by the Query
+     * @return true if there are any items, false in other case.
+     */
     public boolean isEmpty() {
         return !_iterator.hasNext();
     }
@@ -185,6 +194,10 @@ public class Query<T> implements Iterable<T>{
         return _iterator;
     }
 
+    /**
+     * Process the query and return all items from the query as a List<?>
+     * @return list with all the items
+     */
     public List<T> toList(){
         ArrayList<T> r = new ArrayList<T>();
         for(T t : this){
@@ -193,34 +206,50 @@ public class Query<T> implements Iterable<T>{
         return r;
     }
 
-    public Object[] toArray() {
-        List<T> ts = toList();
-        Object[] objects = new Object[ts.size()];
-        int idx = 0;
-        for(T t : ts){
-            objects[idx] = t;
-            idx++;
+    /**
+     * Process query and return all values as an array
+     *
+     * CAUTION, this runs twice runs of the query as soon as it calculates array size.
+     * so in case your source changes after first run you might get unexpected result
+     * I highly recommend to use toList, which is more predictable.
+     * @param c - Class for an array item
+     * @return array of emelents returned by the query
+     */
+    public T[] toArray(Class c) {
+        T[] retVal = (T[]) Array.newInstance(c, size());
+        int i = 0;
+        for(T t : this){
+            retVal[i] = t;
+            i++;
         }
-        return objects;
+        return retVal;
     }
 
-    public T[] toArray(T[] a) {
-        int idx = 0;
-        while(_iterator.hasNext()){
-            idx++;
-            a[idx] = _iterator.next();
-        }
-        return a;
-    }
-
+    /**
+     * Assign a new filter to the Query, returned query will yield only the items for which
+     * selector returned true
+     * @param selector - checks if an item should stay in output query, selector.run(..) should return true
+     * if we want to keep the item, or false if not.
+     * @return a new Query with items filtered with selector
+     */
     public Query<T> where(Func<T,Boolean> selector){
         return new Query<T>(new WhereIterator<T>(_iterator,selector));
     }
 
+    /**
+     * Convert collection to another, processing each item.
+     * @param selector - gets every item and returns an item for a new Query
+     * @return a new query with items processed by selector
+     */
     public <TOUT> Query<TOUT> select(Func<T,TOUT> selector){
         return new Query<TOUT>(new SelectIterator<T,TOUT>(_iterator,selector));
     }
 
+    /**
+     * Convert collection each item yielding another collection to a flat collection
+     * @param selector function returning a new collection for an item in incoming collection
+     * @return a new query flat with all items from evey collection returned by selector.
+     */
     public <TOUT> Query<TOUT> selectMany(Func<T, Query<TOUT>> selector){
         return new Query<TOUT>(new SelectManyIterator<T,TOUT>(_iterator,selector));
     }
