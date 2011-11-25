@@ -37,7 +37,7 @@ public class Query<T> implements Iterable<T>{
     }
 
     public interface Accum<TIN1,TOUT>{
-        public TOUT run(TIN1 in, TOUT in2);
+        public TOUT run(TIN1 item, TOUT accumulator);
     }
 
     private static class ArrayIterator<T> implements Iterator<T>{
